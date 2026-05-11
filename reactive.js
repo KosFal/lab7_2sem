@@ -35,7 +35,7 @@ class Sensor {
   }
 
   sendUpdate(value) {
-    console.log(`\n📡 [${this.name}] Нові дані: ${value}`);
+    console.log(`\n [${this.name}] Нові дані: ${value}`);
     this.messenger.emit('dataFlow', {
       value: value,
       sensor: this.name,
@@ -48,7 +48,7 @@ class Display {
   constructor(label, messenger) {
     this.label = label;
     this.unsub = messenger.subscribe('dataFlow', (data) => {
-      console.log(`🖥️  [Екран ${this.label}] Відображаю: ${data.value} від ${data.sensor}`);
+      console.log(`  [Екран ${this.label}] Відображаю: ${data.value} від ${data.sensor}`);
     });
   }
 
@@ -57,3 +57,20 @@ class Display {
     console.log(` [Екран ${this.label}] Вимкнено.`);
   }
 }
+
+const bus = new EventEmitter()
+const weatherSensor = new Sensor("Метеостанція", bus);
+
+const officeDisplay = new Display("Офіс", bus);
+const hallDisplay = new Display("Хол", bus);
+
+const logger = (data) => console.log(` [Log] Збережено в базу: ${data.value}`);
+bus.subscribe('dataFlow', logger);
+
+weatherSensor.sendUpdate("+20°C");
+
+console.log("\n Оновлення системи: Хол вимикається, логування зупинено ");
+hallDisplay.close();
+bus.unsubscribe('dataFlow', logger);
+
+weatherSensor.sendUpdate("+22°C");
