@@ -27,3 +27,33 @@ class EventEmitter {
     );
   }
 }
+
+class Sensor {
+  constructor(name, messenger) {
+    this.name = name;
+    this.messenger = messenger;
+  }
+
+  sendUpdate(value) {
+    console.log(`\n📡 [${this.name}] Нові дані: ${value}`);
+    this.messenger.emit('dataFlow', {
+      value: value,
+      sensor: this.name,
+      time: new Date().toLocaleTimeString()
+    });
+  }
+}
+
+class Display {
+  constructor(label, messenger) {
+    this.label = label;
+    this.unsub = messenger.subscribe('dataFlow', (data) => {
+      console.log(`🖥️  [Екран ${this.label}] Відображаю: ${data.value} від ${data.sensor}`);
+    });
+  }
+
+  close() {
+    this.unsub(); 
+    console.log(` [Екран ${this.label}] Вимкнено.`);
+  }
+}
